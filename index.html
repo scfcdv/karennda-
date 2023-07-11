@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>カレンダー</title>
+  <link rel="icon" href="https://scfcdv.github.io/homeweb2/favicon.ico">
+  <style>
+    table {
+      border-collapse: collapse;
+    }
+    th, td {
+      padding: 5px;
+      text-align: center;
+      border: 1px solid #ccc;
+    }
+    td:hover {
+      background-color: #e6e6e6;
+      cursor: pointer;
+    }
+  </style>
+</head>
+<body>
+  <table id="calendar">
+    <thead>
+      <tr>
+        <th>日</th>
+        <th>月</th>
+        <th>火</th>
+        <th>水</th>
+        <th>木</th>
+        <th>金</th>
+        <th>土</th>
+      </tr>
+    </thead>
+    <tbody></tbody>
+  </table>
+
+  <div id="popup" style="display: none;">
+    <h3>予定を入力</h3>
+    <input type="text" id="eventInput">
+    <button id="saveBtn">保存</button>
+    <button id="cancelBtn">キャンセル</button>
+  </div>
+
+  <script>
+    var selectedDate;
+    var events = {};
+
+    function generateCalendar(year, month) {
+      var tableBody = document.querySelector('#calendar tbody');
+      tableBody.innerHTML = '';
+
+      var date = new Date(year, month, 1);
+      var currentMonth = date.getMonth();
+
+      while (date.getMonth() === currentMonth) {
+        var row = document.createElement('tr');
+
+        for (var i = 0; i < 7; i++) {
+          var cell = document.createElement('td');
+          cell.textContent = date.getDate();
+
+          if (date.getMonth() === currentMonth) {
+            cell.addEventListener('click', function() {
+              selectedDate = new Date(year, month, this.textContent);
+              openPopup();
+            });
+          }
+
+          row.appendChild(cell);
+          date.setDate(date.getDate() + 1);
+        }
+
+        tableBody.appendChild(row);
+      }
+    }
+
+    function openPopup() {
+      document.getElementById('eventInput').value = '';
+      document.getElementById('popup').style.display = 'block';
+    }
+
+    function closePopup() {
+      document.getElementById('popup').style.display = 'none';
+    }
+
+    function saveEvent() {
+      var eventInput = document.getElementById('eventInput');
+      var eventText = eventInput.value.trim();
+
+      if (eventText !== '') {
+        var key = selectedDate.toDateString();
+        events[key] = eventText;
+
+        updateCalendar();
+        closePopup();
+      }
+    }
+
+    function updateCalendar() {
+      var tableBody = document.querySelector('#calendar tbody');
+      var cells = tableBody.getElementsByTagName('td');
+
+      for (var i = 0; i < cells.length; i++) {
+        var cell = cells[i];
+        var date = new Date();
+
+        date.setFullYear(year);
+        date.setMonth(month);
+        date.setDate(parseInt(cell.textContent));
+
+        var key = date.toDateString();
+        if (events.hasOwnProperty(key)) {
+          var eventText = events[key];
+          cell.innerHTML = cell.textContent + '<br><span class="event">' + eventText + '</span>';
+        } else {
+          cell.innerHTML = cell.textContent;
+        }
+      }
+    }
+
+    var today = new Date();
+    var year = today.getFullYear();
+    var month = today.getMonth();
+
+    generateCalendar(year, month);
+
+    document.getElementById('saveBtn').addEventListener('click', saveEvent);
+    document.getElementById('cancelBtn').addEventListener('click', closePopup);
+  </script>
+</body>
+</html>
